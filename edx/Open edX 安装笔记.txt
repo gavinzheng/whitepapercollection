@@ -1,0 +1,42 @@
+## 安装源
+
+Open edX 安装时会自动添加 MongoDB, Elasticsearch, RabbitMQ, MySQL 等多个官方的安装源，这些源都在国外，碰到出错是正常的，所以我们需要配置翻墙，让到国外的所有连接都走代理，最好是全局代理，配置到 /etc/environment 文件中。
+
+## Python pip 包
+
+这个在安装时也容易出问题，在 /edx/app/edxapp/edx-platform/requirements 目录下的所有 txt 里列的包都要安装，如果使用内置的 Ansible 脚本，基本上会卡半天，让安装无法继续下去，为解决这个问题，我们需要手动去安装，配置阿里云的 Python pip 安装源，然后逐一安装完，再去执行 Ansible 的安装。
+
+## 克隆 edx-platform 代码
+
+官方 Ansible 脚本在克隆 edx-platform 代码到 /edx/app/edxapp/edx-platform 会出问题，不管是否使用代理，均长时间无法从 github.com 克隆代码到本地。解决步骤：
+
+1. 修改 /var/tmp/configuration/playbooks/roles/edxapp/tasks 目录下的 deploy.yml 文件，注释掉 checkout edx-platform repo into {{ edxapp_code_dir }} 任务的代码。
+2. 手动克隆 edx-platform 代码到 本地目录，例如 /opt/edx-platform。
+3. 修改 /var/tmp/configuration/playbooks/roles/edxapp/tasks 目录下的 deploy.yml 文件，在第 1 步注释的代码块前面添加以下代码:
+
+```
+- name: checkout edx-platform repo from localhost file
+  shell: cp -r /opt/edx-platform /edx/app/edxapp/
+
+- name: change owner and group for edx-platform repo
+  shell: chown -R {{ edxapp_user }}:{{ edxapp_user }} /edx/app/edxapp/edx-platform
+```
+
+再次执行 Ansible 脚本，它就能顺利的往下继续安装了。
+
+## RabbitMQ 虚拟主机
+
+在 RabbitMQ 角色的任务代码中，有以下代码段：
+
+```
+- name: Add vhosts
+  rabbitmq_vhost:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ RABBITMQ_VHOSTS }}"
+  tags:
+    - vhosts
+    - maintenance
+```
+
+这个 Ansible 任务是添加一个 ./ 的虚拟机，这是不支持的，所以执行到这里时会出错，需要将其注释掉，然后重新执行安装。

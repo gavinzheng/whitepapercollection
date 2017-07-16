@@ -1,0 +1,13 @@
+edX kvm镜像下载和使用说明
+
+1. edX fullstack基于蔚云云计算平台安装的kvm镜像文件, kernel 4.2.2，可以直接在各主流linux发行版上直接使用。
+2. 采用virtio网卡，IDE硬盘
+3. 用户名密码：wadmin/WayCloud
+4. 安装文档参考我的QQ日志
+5. 可以用clonezilla迁移到其他虚拟化环境或物理机环境
+6. kvm虚拟化使用可以参考文档：http://www.ibm.com/developerworks/cn/cloud/library/cl-managingvms/
+7. 提供的下载地址速度比较慢，那位有速度快的下载空间可以帮助放上去
+8. 下载地址QQ或在群中索取
+
+netwal0r
+QQ:26751419
