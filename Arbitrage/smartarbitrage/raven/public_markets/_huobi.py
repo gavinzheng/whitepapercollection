@@ -14,6 +14,24 @@ QuotationUrl = HOST + "%s" + "/" + "ticker_%s_json.js"
 DepthUrl = HOST + "%s/depth_%s_%d.js"
 RealTimeTransactionUrl = HOST + "%s/detail_%s_json.js"
 
+ class RealTimeQuotationTicker :
+    def __init__(self):
+        self.High = 0.0
+        self.Low = 0.0
+        self.Last = 0.0
+        self.Value = 0.0
+        self.Buy = 0.0
+        self.Sell = 0.0
+        self.Open = 0.0
+        self.Symbol = ""
+
+
+class RealTimeQuotation :
+    def __init__(self):
+        self.DateTime = 0
+        self.Ticker = 0.0
+
+
 class Huobi(Market):
     accessKey = ""
     secretKey = ""
@@ -22,7 +40,6 @@ class Huobi(Market):
 
     def __init__(self, base_currency, market_currency, pair_code):
         super().__init__(base_currency, market_currency, pair_code)
-
 
         self.event = 'huobi_depth'
         self.subscribe_depth()
@@ -38,7 +55,7 @@ class Huobi(Market):
         self.depth = self.format_depth(depth)
 
 
-    def SendRequest(self, url, parameter) :
+    def sendrequest(self, url, parameter) :
         # body: = ioutil.NopCloser(strings.NewReader(parameter)) // 把form数据编码
         # req, _:= http.NewRequest("POST", uri, body)
         # req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value") // post方式需要
@@ -59,14 +76,16 @@ class Huobi(Market):
         res = urllib.request.urlopen(req)
 
 
-    def SendTradingRequest(self, parameter):
+    def sendtradingrequest(self, parameter):
         # if len(hb.accessKey) < 20 | | len(hb.secretKey) < 20
         # {
         #     return []
         #         byte{}, errors.New("error！the huobi AccessKey and SecretKey is incorrect.")
         # }
-
         url= API_V3_URI
-        return SendRequest(self, url, parameter)
+        return self.sendrequest(self, url, parameter)
 
 
+    def QuotationJSON (self) :
+        requestUrl = QuotationUrl %  ("btc" , "staticmarket")
+        return self.sendrequest(requestUrl,"")
