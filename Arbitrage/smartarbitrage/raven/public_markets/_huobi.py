@@ -14,7 +14,7 @@ QuotationUrl = HOST + "%s" + "/" + "ticker_%s_json.js"
 DepthUrl = HOST + "%s/depth_%s_%d.js"
 RealTimeTransactionUrl = HOST + "%s/detail_%s_json.js"
 
- class RealTimeQuotationTicker :
+class RealTimeQuotationTicker :
     def __init__(self):
         self.High = 0.0
         self.Low = 0.0
@@ -38,11 +38,13 @@ class Huobi(Market):
     market =""
     userAgent = ""
 
-    def __init__(self, base_currency, market_currency, pair_code):
+    def __init__(self, base_currency, market_currency, pair_code=""):
         super().__init__(base_currency, market_currency, pair_code)
 
         self.event = 'huobi_depth'
         self.subscribe_depth()
+        jsonret = self.QuotationJSON()
+        print("jsonRet = " + jsonret)
 
     def update_depth(self):
         url = 'http://api.huobi.com/staticmarket/depth_%s_50.js' % self.pair_code
@@ -54,38 +56,25 @@ class Huobi(Market):
         depth = json.loads(res.read().decode('utf8'))
         self.depth = self.format_depth(depth)
 
-
-    def sendrequest(self, url, parameter) :
-        # body: = ioutil.NopCloser(strings.NewReader(parameter)) // 把form数据编码
-        # req, _:= http.NewRequest("POST", uri, body)
-        # req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value") // post方式需要
-        # req.Header.Add("User-Agent", hb.userAgent)
-        # resp, err:= hb.httpClient.Do(req) // 发送请求
-        # data:= []byte{}
-        # if err != nil
-        # {
-        #     return data, err
-        # }
-        # defer
-        # resp.Body.Close() // 一定要关闭resp.Body
-        # return ioutil.ReadAll(resp.Body)
+    def SendRequest(self, url, parameter) :
         req = urllib.request.Request(url, headers={
             "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "*/*",
             "User-Agent": "curl/7.24.0 (x86_64-apple-darwin12.0)"})
         res = urllib.request.urlopen(req)
+        page = res.read()
+        print("res = %s" % page)
+        return page
 
-
-    def sendtradingrequest(self, parameter):
+    def SendTradingRequest(self, parameter):
         # if len(hb.accessKey) < 20 | | len(hb.secretKey) < 20
         # {
         #     return []
         #         byte{}, errors.New("error！the huobi AccessKey and SecretKey is incorrect.")
         # }
-        url= API_V3_URI
-        return self.sendrequest(self, url, parameter)
-
+        url = API_V3_URI
+        return self.SendRequest(self, url, parameter)
 
     def QuotationJSON (self) :
-        requestUrl = QuotationUrl %  ("btc" , "staticmarket")
-        return self.sendrequest(requestUrl,"")
+        requestUrl = QuotationUrl % ("staticmarket", "btc")
+        return self.SendRequest(requestUrl, "")

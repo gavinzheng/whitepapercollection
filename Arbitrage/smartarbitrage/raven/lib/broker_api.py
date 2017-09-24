@@ -1,5 +1,5 @@
 import thriftpy
-broker_thrift = thriftpy.load("raven/lib/broker.thrift", module_name="broker_thrift")
+broker_thrift = thriftpy.load("lib/broker.thrift", module_name="broker_thrift")
 #broker_thrift = thriftpy.load("broker.thrift", module_name="broker_thrift")
 
 from thriftpy.rpc import make_client
