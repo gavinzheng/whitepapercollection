@@ -1,0 +1,53 @@
+sudo vi /etc/apt/sources.list
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install lrzsz
+sudo apt-get install python-pip -y
+sudo pip install shadowsocks
+sudo mkdir ss_conf
+cd ss_conf
+sudo vi shadowsocks.json 
+############添加配置文件############
+	{
+ 	 "server": "{your-server}",
+ 	 "server_port": 40002,
+ 	 "local_port": 1080,
+ 	 "password": "{your-password}",
+ 	 "timeout": 600,
+ 	 "method": "aes-256-cfb"
+	}
+####################################
+sudo sslocal -c /home/ubuntu/ss_conf/shadowsocks.json -d
+sudo apt-get install polipo
+sudo vi /etc/polipo/config
+############配置polipo#############
+	logSyslog = true
+	logFile = /var/log/polipo/polipo.log
+
+	proxyAddress = "0.0.0.0"
+
+	socksParentProxy = "127.0.0.1:1080"
+	socksProxyType = socks5
+
+	chunkHighMark = 50331648
+	objectHighMark = 16384
+
+	serverMaxSlots = 64
+	serverSlots = 16
+	serverSlots1 = 32
+
+###################################
+sudo /etc/init.d/polipo restart
+export http_proxy="http://127.0.0.1:8123/"
+sudo vim /etc/resolvconf/resolv.conf.d/base
+##################修改DNS###########
+	nameserver 8.8.8.8
+	nameserver 8.8.4.4
+####################################
+sudo resolvconf -u
+sudo /etc/init.d/dns-clean start
+curl www.google.com
+
+重启后执行
+sudo sslocal -c shawdowsocks.json -d start
+export http_proxy="http://127.0.0.1:8123/"

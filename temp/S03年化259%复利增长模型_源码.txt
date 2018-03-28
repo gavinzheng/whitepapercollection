@@ -1,0 +1,68 @@
+#该策略由"量化侠"分享,量化侠精神：我们本着分享的精神，
+#将我们了解到的信息与策略以及有关量化的一切资源都会免费
+#的分享给大家。团队的成员主要是由人工智能，
+#以及数据挖掘的专家团队组成。
+#向喜欢量化和金融的朋友免费分享我们的研究成果。 
+#量化侠微信：Quant_MM
+#量化侠公众号：量化侠
+#今日头条：量化侠
+#添加我们之后，以后每期更新的策略源码和说明就会及时到您手上
+start = '2014-01-19'                       # 回测起始时间
+end = '2016-12-31'                         # 回测结束时间
+benchmark = 'HS300'                        # 策略参考标准
+universe = DynamicUniverse('A')  # 证券池，支持股票和基金
+capital_base = 100000                      # 起始资金
+freq = 'm'                                 # 策略类型，'d'表示日间策略使用日线回测，'m'表示日内策略使用分钟线回测
+refresh_rate = (1,['10:01'])                           # 调仓频率，表示执行handle_data的时间间隔，若freq = 'd'时间间隔的单位为交易日，若freq = 'm'时间间隔为分钟
+import datetime
+import pandas as pd
+def initialize(account):                   # 初始化虚拟账户状态
+    pass
+
+def handle_data(account):                  # 每个交易日的买入卖出指令
+    pre_date=account.previous_date
+    date=account.current_date
+    #提取一年以内上市的股票
+    year_before=date-datetime.timedelta(days=365)
+    IPO_name=list(DataAPI.EquIPOGet(beginDate=year_before,endDate=date,field=u"secID,secShortName",pandas="1").secID)
+    if len(IPO_name)>0:
+        #获取股票的实时价格与昨日收盘价
+        a= account.history(symbol=IPO_name, attribute=['closePrice'], time_range=1, freq='d', style='ast').values()[0].T    
+        b= account.history(symbol=IPO_name, attribute=['closePrice'], time_range=1, freq='m', style='ast').values()[0].T
+        c= pd.concat([a,b],axis=1)
+        #剔除当日涨停、跌停或停牌的股票
+        c['res']=1
+        c['res'][(c.iloc[:,1]/c.iloc[:,0]-1>0.0993)|(c.iloc[:,1]/c.iloc[:,0]-1<-0.0993)]=0
+        temp= list(c[c['res']==1].index)
+        bb=DataAPI.MktStockFactorsOneDayGet(tradeDate=pre_date,secID=temp,field=u"secID,tradeDate,LCAP",pandas="1")
+        bb=bb[bb['LCAP']<23.02]
+        cc=bb.sort_values('LCAP',ascending=True).head(10)
+        stock=list(cc.secID)
+        for j in stock:
+            order_pct_to(j,1.0/10)
+    else:pass
+    #当日持仓股票
+    hold=account.avail_security_position.keys()
+    if len(hold)>0:
+        m= account.history(symbol=hold, attribute=['closePrice'], time_range=1, freq='d', style='ast').values()[0].T    
+        n= account.history(symbol=hold, attribute=['closePrice'], time_range=1, freq='m', style='ast').values()[0].T
+        o= pd.concat([m,n],axis=1)
+        o['res']=1
+        o['res'][o.iloc[:,1]/o.iloc[:,0]-1>0.0993]=0
+        sell= list(o[o['res']==1].index)
+        for i in hold:
+            if i not in stock:
+                if i in sell:
+                    order_pct_to(i,0)
+    else:
+        pass
+    return
+#该策略由"量化侠"分享,量化侠精神：我们本着分享的精神，
+#将我们了解到的信息与策略以及有关量化的一切资源都会免费
+#的分享给大家。团队的成员主要是由人工智能，
+#以及数据挖掘的专家团队组成。
+#向喜欢量化和金融的朋友免费分享我们的研究成果。 
+#量化侠微信：Quant_MM
+#量化侠公众号：量化侠
+#今日头条：量化侠
+#添加我们之后，以后每期更新的策略源码和说明就会及时到您手上

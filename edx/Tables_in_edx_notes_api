@@ -1,0 +1,14 @@
++----------------------------+
+| Tables_in_edx_notes_api    |
++----------------------------+
+| auth_group                 |
+| auth_group_permissions     |
+| auth_permission            |
+| auth_user                  |
+| auth_user_groups           |
+| auth_user_user_permissions |
+| corsheaders_corsmodel      |
+| django_content_type        |
+| django_migrations          |
+| v1_note                    |
++----------------------------+

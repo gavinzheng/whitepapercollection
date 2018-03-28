@@ -1,0 +1,123 @@
+
+
+1) sudo apt-get install autoconf
+2) sudo apt-get install libtool
+3)
+  cd ~
+  mkdir librarys
+  git clone https://github.com/cryptonomex/secp256k1-zkp.git
+   cd secp256k1-zkp
+   ./autogen.sh
+   ./configure
+   make
+   sudo make install
+4) git clone https://github.com/eosio/eos --recursive
+
+
+5)llvm clang for WASM
+mkdir  ~/wasm-compiler
+cd ~/wasm-compiler
+git clone --depth 1 --single-branch --branch release_40 https://github.com/llvm-mirror/llvm.git
+cd llvm/tools
+git clone --depth 1 --single-branch --branch release_40 https://github.com/llvm-mirror/clang.git
+cd ..
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=.. -DLLVM_TARGETS_TO_BUILD= -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD=WebAssembly -DCMAKE_BUILD_TYPE=Release ../
+make -j4 install
+
+6)
+sudo apt-get autoremove cmake
+cd ~/librarys
+wget https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.tar.gz
+tar zxvf cmake-3.8.0-Linux-x86_64.tar.gz
+cd cmake-3.8.0-Linux-x86_64
+sudo ln -s ~/librarys/cmake-3.8.0-Linux-x86_64/bin/* /usr/bin/
+sudo ldconfig
+cmake --version
+cmake version 3.8.0
+
+7)
+tar zxvf boost_1_64_0.tar.gz
+cd boost_1_64_0
+./bootstrap.sh
+#sudo ./b2 link=shared threading=multi  runtime-link=shared variant=release install
+./bjam release install
+
+8)
+wget https://www.openssl.org/source/openssl-1.1.0f.tar.gz
+tar zxvf openssl-1.1.0f.tar.gz
+cd openssl-1.1.0f
+./Configure shared linux-x86_64
+sudo make install
+
+9)
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get update
+sudo apt-get install gcc-4.9
+sudo apt-get install g++-4.9
+装了ppa,各种版本就可以共存了。不过有一个问题，每次要用的时候，必须使用g++-4.9，如果直接用g++会运行4.8版本的，非常麻烦。
+所以需要改一下/usr/bin/下的链接。
+
+sudo su
+cd ../../usr/bin
+ln -s /usr/bin/g++-4.9 /usr/bin/g++ -f
+ln -s /usr/bin/gcc-4.9 /usr/bin/gcc -f
+
+10)
+sudo apt-get install libbz2-dev
+
+11)
+sudo apt-get install libgmp-dev
+
+12)
+sudo apt-get install zlib1g-dev
+
+13)
+git clone https://github.com/eosio/eos --recursive
+mkdir -p eos/build && cd eos/build
+WASM_LLVM_CONFIG=~/wasm-compiler/llvm/bin/llvm-config LLVM_DIR=~/wasm-compiler/llvm/lib/cmake/llvm cmake ..
+make -j4
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+1)
+sudo apt-get install clang-4.0 lldb-4.0 lld-4.0
+sudo  update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-4.0/bin/clang 400
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-4.0/bin/clang++ 400
+
+2)
+sudo apt-get install python-dev python3-dev
+
+3)
+sudo apt-get install libicu-dev
+
+4)
+tar zxvf boost_1_64_0.tar.gz
+cd boost_1_64_0
+./bootstrap.sh --with-toolset=clang
+./b2 -a -j$(nproc) link=shared threading=multi  runtime-link=shared variant=release -sHAVE_ICU=1 --sICU_PATH=/usr
+ sudo ./b2 install
+
+ sudo apt-get install libssl-dev
+
+sudo apt-get install mpi-default-dev
+
+5)
+wget https://cmake.org/files/v3.9/cmake-3.9.0.tar.gz
+$tar -zxvf cmake-3.9.0.tar.gz
+$./bootstrap 
+$make 
+$make install
+
+6)
+
+在目录：
+walker@walker-desktop:~/eos/build$ 
+
+WASM_LLVM_CONFIG=/opt/wasm/bin/llvm-config cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_INSTALL_PREFIX=/opt/eos ../
+make -j2
+
+
+
